@@ -19,7 +19,7 @@ public class Listener extends Thread {
     private static Listener mListener = null;
     List<User> userList = new ArrayList<>();
     MemcachedService ms = new MemcachedServiceImpl();
-    public int i =0;
+    public int i = 0;
 
     public static Listener getInstance() {
         if (mListener == null) {
@@ -72,11 +72,13 @@ public class Listener extends Thread {
                 socket = mServerSocket.accept();// which is connected to the
                 // socket from client
                 // break;
-                User user = new User("user"+i,socket);
-                userList.add(user);
+                //userList = ms.get("userList");
+                User user = new User("user" + i, socket);
+                //userList.add(user);
                 i++;
-                System.out.println(user.getUserName()+"用户已上线");
-                ms.add("userList",userList);
+                System.out.println(user.getUserName() + "用户已上线");
+                //ms.add("userList", userList);
+                ChatManager.getChatManager().add(user);
                 if (!mStopFlag) {
                     mThreadPool.execute(new SocketServer(socket));
                 } else {

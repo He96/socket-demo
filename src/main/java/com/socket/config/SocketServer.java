@@ -27,19 +27,17 @@ public class SocketServer extends Thread {
     public void run() {
         try {
             String resp = readSocket();
-            //获取消息
-            User user = JSON.parseObject(resp, User.class);
-            //消息处理
-            dealInfo(user);
+            dealInfo(resp);
         } catch (Exception e) {
-        } finally {
+            e.printStackTrace();
+        } /*finally {
             if (!mSocket.isClosed())
                 try {
                     mSocket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-        }
+        }*/
     }
 
     private String readSocket() {
@@ -60,15 +58,23 @@ public class SocketServer extends Thread {
         SocketUtil.Send(resp, socket);
     }
 
-    public void dealInfo(User user) throws Exception {
-        List<User> list = ms.get("userList");
-        for (User item : list) {
-            if (item.getUserName().equals(user.getToUser())) {
-                String userName = user.getUserName();
-                user.setUserName(user.getToUser());
-                user.setToUser(userName);
-                SocketUtil.Send(JSON.toJSONString(user), item.getSocket());
+    public void dealInfo(String userInfo) throws Exception {
+        if (!"".equals(userInfo)) {
+            User user = JSON.parseObject(userInfo, User.class);
+            user.setStatus(1);
+            List<User> list = ChatManager.getChatManager().get();//ms.get("userList");
+            //服务器转发消息
+            for (User item : list) {
+                if (item.getUserName().equals(user.getToUser())) {
+                    writeResponse(JSON.toJSONString(user), item.getSocket());
+                }
             }
+            //回复客户端消息
+            user.setStatus(2);
+            user.setMessage("发送成功!");
+            SocketUtil.Send(JSON.toJSONString(user), mSocket);
+        } else {
+            System.out.println("未收到消息");
         }
     }
 

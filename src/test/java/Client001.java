@@ -1,35 +1,21 @@
 
 import com.alibaba.fastjson.JSON;
 import com.socket.config.*;
-import com.socket.conn.MemcachedConn;
 import com.socket.model.User;
-import com.socket.util.MemcachedService;
-import com.socket.util.MemcachedServiceImpl;
-import net.spy.memcached.MemcachedClient;
-
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.UUID;
-import java.util.concurrent.Future;
 
-public class Main {
+public class Client001 {
     public static void main(String[] args){
         socketMain();
-        //getMemc();
-    }
-
-    public static void getMemc(){
-        MemcachedClient mc = MemcachedConn.getInstance().getmConn();
-        System.out.println("he:" + mc.get("he"));
     }
 
     public static void socketMain(){
         try {
-
+            Socket socket = SocketClient.openSocket();
             System.out.println("客户端001");
             Scanner scanner = new Scanner(System.in);
+            scanner.useDelimiter("\n");
             System.out.println("------------填写用户信息-------------");
             System.out.println("姓名:");
             User user = new User();
@@ -41,12 +27,22 @@ public class Main {
                 System.out.println("消息:");
                 String info = scanner.next();
                 user.setMessage(info);
-                Socket socket = SocketClient.openSocket();
                 SocketUtil.Send(JSON.toJSONString(user), socket);
-                Thread.sleep(500);
                 System.out.println("------------聊天记录------------------");
+                System.out.println("你对"+user.getToUser()+"说:"+user.getMessage());
+                Thread.sleep(500);
                 String respstr = SocketUtil.Accept(socket);
-                System.out.println("res001"+respstr);
+                if(!"".equals(respstr) && respstr != null ){
+                    User resUser = JSON.parseObject(respstr,User.class);
+                    if(resUser.getStatus() == 2){
+                        System.out.println("系统通知:" + resUser.getMessage());
+                    }else{
+                        System.out.println(user.getUserName()+"对你说:"+user.getMessage());
+                    }
+                }else{
+                    System.out.println("暂无回应！");
+                }
+
                /* User resUser = JSON.parseObject(respstr,User.class);
                 System.out.println(resUser.getUserName()+":说" + resUser.getMessage());*/
             }

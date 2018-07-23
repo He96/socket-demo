@@ -17,9 +17,11 @@ public class SocketUtil {
     //接受数据
     public static String Accept(Socket socket) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-        String line= null;
-        if((line = reader.readLine()) != null){
-            return line;
+        String line = null;
+        if (reader != null) {
+            if ((line = reader.readLine()) != null) {
+                return line;
+            }
         }
         return "服务器走神了";
     }
